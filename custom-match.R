@@ -1,13 +1,8 @@
 # Detection of communities in dynamic TV Series network using static
 # approaches then matching communities in consecutive time slice through
-# Derek Greene's dynamic-communty method.
-# https://github.com/derekgreene/dynamic-community
+# a naive approach.
 # 
 # In this version of the script, we process each season separately.
-# 
-# The post-processing (i.e. extracting the meta-graph once the communities
-# have been matched) is much too slow when performed in R, so it was
-# re-implemented in Java.
 # 
 # Usage:
 # 1) possibly edit the above parameters
@@ -17,9 +12,9 @@
 # 3) to set up the current R workspace, type (replace by your own path to this project):
 #		setwd("D:/Eclipse/workspaces/Networks/Series")
 # 4) then, to launch the script, type: 
-#		source("dyncom-seasons.R")
+#		source("custom-match.R")
 # 
-# Author: Vincent Labatut
+# Author: Vincent Labatut 12/2016
 ###############################################################################
 library("tools")
 library("igraph")
@@ -35,13 +30,10 @@ data.folder <- "BB_dyn_ns"
 #data.folder <- "GoT_dyn_ns"
 #data.folder <- "HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
-dyncom.folder <- "dyncom"							# TODO folder containing the dynamic-community executable files
-dyncom.exec <- file.path(dyncom.folder,"tracker")	# TODO executable file of the dynamic-community tracking program 
-dyncompostj.folder <- "dyncompostj"					# TODO folder containing the Java class for the postprocessing of dynamic-community results
-dyncompostj.exec <- "Main"							# TODO executable file of the dynamic-community tracking program 
 static.method <- "Louvain"							# TODO static community detection method
-reload <- TRUE										# TODO only perform the last part (detection and tracking already done) 
-use.java <- TRUE									# TODO use the Java version of the postprocessing (much faster) 
+use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 
+min.jacc <- 0.3 									# TODO value of Jaccard's coefficient above which two communities are considered similar
+min.size <- 4										# TODO below this size, we don't try to match the communities
 
 
 
@@ -95,7 +87,7 @@ for(season in seasons)
 			integ.mat <- integ.mat + as_adjacency_matrix(graph=g, attr="weight")
 		
 		# execute the static approach
-		if(reload)
+		if(use.cache)
 		{	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Just loading the file\n",sep="")
 			comlist.file <- file.path(getwd(),paste0(file_path_sans_ext(graphml.file),"_cl.txt"))
 			comlist.txt <- readLines(comlist.file)
@@ -168,10 +160,6 @@ for(season in seasons)
 	# track the communities using a custom method
 	###############################################################################
 	cat("\n\n[",format(Sys.time(),"%a %d %b %Y %X"),"] Tracking the communities for season #",season,"\n",sep="")
-	# threshold above which two communities are considered to be similar
-	min.jacc <- 0.3 # value of Jaccard's coefficient above which two communities are considered similar
-	min.size <- 4	# below this size, we don't try to match the communities
-	min.cent <- 0.2	# minimal centrality for a node to appear in the simplified labels
 	
 #	# only keep communities larger than a certain size
 #	filtered.coms <- lapply(all.coms,function(time.coms) time.coms[which(sapply(time.coms,length)>3)])

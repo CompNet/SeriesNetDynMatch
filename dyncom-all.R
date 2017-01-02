@@ -20,7 +20,7 @@
 # 4) then, to launch the script, type: 
 #		source("dyncom-all.R")
 # 
-# Author: Vincent Labatut
+# Author: Vincent Labatut 12/2016
 ###############################################################################
 library("tools")
 library("igraph")
