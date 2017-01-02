@@ -72,8 +72,7 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 
 # process each season separately
 ###############################################################################
-#for(season in seasons)
-for(season in c(1))
+for(season in seasons)
 {	graph.files <- all.graph.files[seasons==season]
 	
 	# apply the static approach to each iteration
@@ -258,62 +257,168 @@ for(season in c(1))
 		E(g)[i]$jaccard=link.mat[i,5]		
 	}
 	
+#	# process positions
+#	V(g)$x <- as.numeric(sapply(V(g)$name, function(nm) strsplit(nm,"-",fixed=TRUE)[[1]][1]))
+#	done <- c()
+#	roots <- which(degree(g,mode="in")==0)
+#	V(g)[roots]$y <- 1:length(roots)*100
+#	V(g)[roots]$ysup <- V(g)[roots]$y + 100
+#	fringe <- roots
+#	while(length(fringe)>0)
+#	{	node <- fringe[1]
+#		fringe <- fringe[-1]
+#		if(!(node %in% done))
+#		{	done <- c(done,node)
+#			# get neighbors		
+#cat("node=",node,"\n",sep="")	
+#			neighs <- ego(graph=g,order=1,nodes=node,mode="out")[[1]][-1]
+#cat("  neighs=",paste(neighs,collapse=" ")," (",length(neighs)>1,")\n",sep="")	
+#			# update positions
+#cat("  y=",V(g)[node]$y," ysup=",V(g)[node]$ysup,"\n",sep="")
+#			if(length(neighs)==1)
+#			{	V(g)[neighs]$y <- V(g)[node]$y
+#				V(g)[neighs]$ysup <- V(g)[node]$ysup
+#				fringe <- c(fringe,neighs)
+#			}
+#			else if(length(neighs)>1)
+#			{	# identify the most similar child
+#				same <- 1
+#				same.jacc <- edge_attr(g,"jaccard",E(g)[node %->% neighs[1]])
+#				for(n in 2:length(neighs))
+#				{	jacc <- edge_attr(g,"jaccard",E(g)[node %->% neighs[n]])
+#					if(jacc>same.jacc)
+#					{	same <- n
+#						same.jacc <- jacc
+#					}
+#				}
+#cat("  same=",same," same.jacc=",same.jacc,"\n",sep="")
+#				neighs <- c(neighs[same],neighs[-same])
+##				V(g)[neighs[same]]$y <- V(g)[node]$y
+##				V(g)[neighs[same]]$ysup <- V(g)[node]$ysup
+##				fringe <- c(fringe,neighs[same])
+##				neighs <- neighs[-same]
+#				# process the rest of the children
+#				pos <- seq(from=V(g)[node]$y,to=V(g)[node]$ysup,by=(V(g)[node]$ysup-V(g)[node]$y)/length(neighs))
+#				V(g)[neighs]$y <- pos[1:(length(pos)-1)]
+#				V(g)[neighs]$ysup <- pos[2:length(pos)]
+#				fringe <- c(fringe,neighs)
+#cat("  neighs=",paste(neighs,collapse=" "),"\n",sep="")
+#cat("  y=",paste(pos[2:(length(pos)-1)],collapse=" "),"\n",sep="")	
+#cat("  ysup=",paste(pos[3:length(pos)],collapse=" "),"\n",sep="")	
+#			}
+#		}
+#	}
+#	g <- delete_vertex_attr(g,"ysup")
+#	# normalize y positions
+#	vals <- sort(unique(V(g)$y))
+#	idx <- match(V(g)$y,vals)
+#	V(g)$y <- idx
+	
 	# process positions
 	V(g)$x <- as.numeric(sapply(V(g)$name, function(nm) strsplit(nm,"-",fixed=TRUE)[[1]][1]))
-	done <- c()
-	roots <- which(degree(g,mode="in")==0)
-	V(g)[roots]$y <- 1:length(roots)*100
-	V(g)[roots]$ysup <- V(g)[roots]$y + 100
-	fringe <- roots
-	while(length(fringe)>0)
-	{	node <- fringe[1]
-		fringe <- fringe[-1]
-		if(!(node %in% done))
-		{	done <- c(done,node)
-			# get neighbors		
-cat("node=",node,"\n",sep="")	
-			neighs <- ego(graph=g,order=1,nodes=node,mode="out")[[1]][-1]
-cat("  neighs=",paste(neighs,collapse=" ")," (",length(neighs)>1,")\n",sep="")	
-			# update positions
-cat("  y=",V(g)[node]$y," ysup=",V(g)[node]$ysup,"\n",sep="")
-			if(length(neighs)==1)
-			{	V(g)[neighs]$y <- V(g)[node]$y
-				V(g)[neighs]$ysup <- V(g)[node]$ysup
-				fringe <- c(fringe,neighs)
-			}
-			else if(length(neighs)>1)
-			{	# identify the most similar child
-				same <- 1
-				same.jacc <- edge_attr(g,"jaccard",E(g)[node %->% neighs[1]])
-				for(n in 2:length(neighs))
-				{	jacc <- edge_attr(g,"jaccard",E(g)[node %->% neighs[n]])
-					if(jacc>same.jacc)
-					{	same <- n
-						same.jacc <- jacc
-					}
-				}
-cat("  same=",same," same.jacc=",same.jacc,"\n",sep="")
-				neighs <- c(neighs[same],neighs[-same])
-#				V(g)[neighs[same]]$y <- V(g)[node]$y
-#				V(g)[neighs[same]]$ysup <- V(g)[node]$ysup
-#				fringe <- c(fringe,neighs[same])
-#				neighs <- neighs[-same]
-				# process the rest of the children
-				pos <- seq(from=V(g)[node]$y,to=V(g)[node]$ysup,by=(V(g)[node]$ysup-V(g)[node]$y)/length(neighs))
-				V(g)[neighs]$y <- pos[1:(length(pos)-1)]
-				V(g)[neighs]$ysup <- pos[2:length(pos)]
-				fringe <- c(fringe,neighs)
-cat("  neighs=",paste(neighs,collapse=" "),"\n",sep="")
-cat("  y=",paste(pos[2:(length(pos)-1)],collapse=" "),"\n",sep="")	
-cat("  ysup=",paste(pos[3:length(pos)],collapse=" "),"\n",sep="")	
+	# init position matrix
+	t <- 1
+	while(length(which(V(g)$x==t))==0)
+		t <- t + 1
+	roots <- which(V(g)$x==t)
+	pos.mat <- matrix(NA,nrow=length(roots),ncol=length(all.coms))
+	pos.mat[,t] <- V(g)[roots]$name
+	# update position matrix
+	for(t in (t+1):length(all.coms))
+	{	nodes <- which(V(g)$x==t)
+		# get previous nodes
+		prev <- rep(NA,nrow(pos.mat))
+		t0 <- t
+		while(t0>0 && any(is.na(prev)))
+		{	idx <- which(is.na(prev))
+			prev[idx] <- pos.mat[idx,t0]
+			t0 <- t0 - 1
+		}
+		if(any(is.na(prev)))
+			prev <- prev[-which(is.na(prev))]
+		prev <- as.numeric(V(g)[prev])
+#		prev <- which(V(g)$x==(t-1))
+		# first, one-to-one association should be favored for stability matters
+		singles <- which(degree(g,V(g)[nodes],mode="in")==1)
+		for(tgt in nodes[singles])
+		{	src <- ego(g,1,tgt,mode="in")[[1]][-1]
+			if(degree(g,V(g)[src],mode="out")==1)
+			{	pos <- which(pos.mat[,t-1]==V(g)[src]$name)
+				pos.mat[pos,t] <- V(g)[tgt]$name
+				prev <- prev[-which(prev==src)]
+				nodes <- nodes[-which(nodes==tgt)]
 			}
 		}
+		# second, identify the best associations for remaining non-root nodes
+		links <- E(g)[prev %->% nodes]
+		if(length(links)>0)
+		{	jacc <- edge_attr(g,"jaccard",links)
+			idx <- order(jacc,decreasing=TRUE)
+			for(i in idx)
+			{	link <- links[i]
+				src <- head_of(g, link)
+				tgt <- tail_of(g, link)
+				if(src %in% prev & tgt %in% nodes)
+				{	pos <- which(pos.mat[,t-1]==V(g)[src]$name)
+					pos.mat[pos,t] <- V(g)[tgt]$name
+					prev <- prev[-which(prev==src)]
+					nodes <- nodes[-which(nodes==tgt)]
+				}
+			}
+		}
+		# third, process the remaining non-root nodes
+		nonroots <- which(degree(g,V(g)[nodes],mode="in")>0)
+		for(tgt in nodes[nonroots])
+		{	links <- E(g)[prev %->% tgt]
+			if(length(links)>0)
+			{	jacc <- edge_attr(g,"jaccard",links)
+				idx <- which.max(jacc)
+				link <- links[idx]
+				src <- head_of(g, link)
+				pos <- which(pos.mat[,t-1]==V(g)[src]$name)
+				pos.mat[pos,t] <- V(g)[tgt]$name
+				prev <- prev[-which(prev==src)]
+				nodes <- nodes[-which(nodes==tgt)]
+			}
+		}
+		# fourth, find the best position for the remaining nodes (roots or orphans)
+		if(length(prev)>0 && length(nodes)>0)
+		{	pairs <- as.matrix(expand.grid(prev,nodes))
+			jacc <- apply(pairs,1,function(pair) 
+					{	t0 <- as.numeric(strsplit(V(g)[pair[1]]$name,"-",fixed=TRUE)[[1]][1])
+						jaccard(all.coms[[t0]][[V(g)[pair[1]]$name]], all.coms[[t]][[V(g)[pair[2]]$name]],cent)
+					})
+			if(any(jacc>=min.jacc))
+			{	jacc <- jacc[-which(jacc<min.jacc)]
+				idx <- order(jacc,decreasing=TRUE)
+				for(i in idx)
+				{	src <- pairs[i,1]
+					tgt <- pairs[i,2]
+					if(src %in% prev & tgt %in% nodes)
+					{	t0 <- as.numeric(strsplit(V(g)[src]$name,"-",fixed=TRUE)[[1]][1])
+						pos <- which(pos.mat[,t0]==V(g)[src]$name)
+						pos.mat[pos,t] <- V(g)[tgt]$name
+						prev <- prev[-which(prev==src)]
+						nodes <- nodes[-which(nodes==tgt)]
+					}
+				}
+			}
+		}
+		# fifth, create new positions for the rest
+		if(length(nodes)>0)
+		{	tmp <- matrix(NA,nrow=length(nodes),ncol=length(all.coms))
+			tmp[,t] <- V(g)[nodes]$name
+			pos.mat <- rbind(tmp,pos.mat)
+		}
 	}
-	g <- delete_vertex_attr(g,"ysup")
-	# normalize y positions
-	vals <- sort(unique(V(g)$y))
-	idx <- match(V(g)$y,vals)
-	V(g)$y <- idx
+	# use position matrix to setup nodes y position
+	for(i in 1:nrow(pos.mat))
+	{	for(j in 1:ncol(pos.mat))
+		{	idx <- pos.mat[i,j]
+			if(!is.na(idx))
+				V(g)[idx]$y <- i
+		}
+	}
 	
 	# format
 	V(g)$x <- V(g)$x * 100 

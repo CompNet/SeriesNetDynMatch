@@ -1,7 +1,4 @@
-/BB_dyn_ns/
-/BB_dyn_ns_updt/
-/GoT_dyn_ns/
-/GoT_dyn_ns_updt/
-/HoC_dyn_ns/
-/HoC_dyn_ns_updt/
-/test_updt/
+BB_dyn_ns_updt
+GoT_dyn_ns_updt
+HoC_dyn_ns_updt
+test_updt
