@@ -16,9 +16,10 @@
 # 
 # Author: Vincent Labatut 12/2016
 ###############################################################################
-library("tools")
-library("igraph")
-#library("compiler")
+library("tools")		# basic R functions
+library("igraph")		# to handle graphs
+#library("compiler")	# to speed up the code
+library("alluvial")		# to generate the alluvial diagrams 
 
 
 
@@ -34,6 +35,7 @@ static.method <- "Louvain"							# TODO static community detection method
 use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 
 min.jacc <- 0.3 									# TODO value of Jaccard's coefficient above which two communities are considered similar
 min.size <- 4										# TODO below this size, we don't try to match the communities
+min.cent <- 0.2										# TODO below this centrality, the nodes are omitted from the simplified labels (so this option is purely graphical)
 
 
 
@@ -64,7 +66,8 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 
 # process each season separately
 ###############################################################################
-for(season in seasons)
+#for(season in seasons)
+for(season in c(1))
 {	graph.files <- all.graph.files[seasons==season]
 	
 	# apply the static approach to each iteration
@@ -72,6 +75,7 @@ for(season in seasons)
 	cat("\n\n[",format(Sys.time(),"%a %d %b %Y %X"),"] Detecting the communities for season #",season,"\n",sep="")
 	node.names <- NA
 	all.coms <- list()
+	all.membersp <- NA
 	integ.mat <- NA
 	for(graph.file in graph.files)
 	{	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]   Processing file '",graph.file,"'\n",sep="")
@@ -101,6 +105,10 @@ for(season in seasons)
 			for(i in 1:length(comlist))
 				membersp[comlist[[i]]] <- i 
 			V(g)$com <- membersp
+			if(all(is.na(all.membersp)))
+				all.membersp <- membersp
+			else
+				all.membersp <- cbind(all.membersp,membersp)
 		}
 		else
 		{	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Applying community detection method '",static.method,"'\n",sep="")
@@ -139,6 +147,7 @@ for(season in seasons)
 			write.graph(graph=g,file=updt.file,format="graphml")
 		}
 	}
+	colnames(all.membersp) <- NULL
 	# record the names
 	char.file <- file.path(data.folder,"characters.txt")
 	write.table(x=node.names,file=char.file,row.names=FALSE,col.names=FALSE)
@@ -421,22 +430,71 @@ for(season in seasons)
 	# record
 	result.file <- file.path(data.folder2,paste0("season",season,".graphml"))
 	write.graph(graph=g,file=result.file,format="graphml")
+	
+	
+	
+	
+	# generate an alluvial diagram
+	###############################################################################
+	cat("\n\n[",format(Sys.time(),"%a %d %b %Y %X"),"] Generate the alluvial diagram for season #",season,"\n",sep="")
+	
+	# replace the com id in all.membersp depending on the previously identified vertical positions
+	all.membersp.chg <- matrix(NA,nrow=nrow(all.membersp),ncol=ncol(all.membersp))
+	for(t in 1:ncol(pos.mat))
+	{	i <- 1
+		old.coms <- order(unique(all.membersp[,t]))
+		for(c in 1:nrow(pos.mat))
+		{	com <- pos.mat[c,t]
+			if(!is.na(com))
+			{	old.com <- as.integer(strsplit(com,"-",fixed=TRUE)[[1]])[2]
+				old.coms <- old.coms[-which(old.coms==old.com)]
+				idx <- which(all.membersp[,t]==old.com)
+				all.membersp.chg[idx,t] <- sprintf("%04d",i)
+				i <- i + 1
+			}
+		}
+		for(old.com in old.coms)
+		{	idx <- which(all.membersp[,t]==old.com)
+			all.membersp.chg[idx,t] <- sprintf("%04d",i)
+			i <- i + 1
+		}
+	}
+
+	# index of characters always appearing in singletons
+	single.mat <- matrix(FALSE,nrow=nrow(all.membersp),ncol=ncol(all.membersp))
+	for(t in 1:ncol(all.membersp.chg))
+	{	tb <- table(all.membersp.chg[,t])
+		sgl.coms <- names(tb)[which(tb==1)]
+		idx <- which(!is.na(match(all.membersp.chg[,t],sgl.coms)))
+		single.mat[idx,t] <- TRUE
+	}
+	
+	# convert the resulting matrix to dataframe, table and all the things the alluvial package needs.
+	t.limit <- 40
+	sel.t <- 1:t.limit
+	singletons <- apply(single.mat[,sel.t],1,all)
+	sel.chars <- (1:nrow(all.membersp.chg))[!singletons]
+	data <- data.frame(apply(all.membersp.chg[sel.chars,sel.t],2,as.character))
+	colnames(data) <- sapply(strsplit(graph.files[sel.t],"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
+	colors <- rep("BLUE",length(sel.chars))
+	colors[which(node.names[sel.chars]=="Jesse Pinkman")] <- "RED"
+	colors[which(node.names[sel.chars]=="Walter White")] <- "PURPLE"
+	data[["freq"]] <- 1
+	alluvial(data[,1:(ncol(data)-1)],
+			freq=data[,ncol(data)],
+			col=colors
+	)
+	
+#	data.frame(apply(matrix(sample(1:4,30,replace=T),nrow=6),2,as.character))
+#	x <- data.frame(factor(1:10),factor(c(rep(1,5),rep(2,5))),factor(sample(1:3,10,replace=TRUE)))
+#	colnames(x) <- c("a","b","c")
+#	df <- as.data.frame(table(x))
+#	alluvial(df[,1:3],freq=df[,4])
+	
+	
+	
 }
 
-
-
-
-# TODO once the matching works: generate an alluvial diagram?
-
-# - use several fringe: one for each slice. put the node in the appropriate slice using its name
-# - when a node has one child: put it on the same line
-# - when a node has several children: 
-#   - put the closest one on the same line
-#   - put the remaining ones on "empty lines" with a similar last community
-#   - put the rest on new lines
-# - when a node has several parents: put it on the line of the closest one
-# >> seems like we need a specific data structure to do that easily... 
-#    - the matrix structure of the other tool?
-#      - but we just need to represent positions, not links
-#        so we can represent merges by NA in the cell of the disappearing com, treat it like a death (graphically)
-#      - then when looking for a new space for a split or birth, check the dead/merged coms (free slots)
+# TODO
+# - sort the coms numbers so that the graphical order matches the... matches. smaller ids are at the bottom
+# - gather all the singletons in the same fake com ?
