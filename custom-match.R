@@ -27,9 +27,9 @@ library("alluvial")		# to generate the alluvial diagrams
 # parameters
 ###############################################################################
 #data.folder <- "test"								# TODO folder containing the data (relatively to the current R workspace)
-data.folder <- "BB_dyn_ns"
+#data.folder <- "BB_dyn_ns"
 #data.folder <- "GoT_dyn_ns"
-#data.folder <- "HoC_dyn_ns"
+data.folder <- "HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
 static.method <- "Louvain"							# TODO static community detection method
 use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 
@@ -66,8 +66,8 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 
 # process each season separately
 ###############################################################################
-#for(season in seasons)
-for(season in c(1))
+for(season in sort(unique(seasons)))
+#for(season in c(1))
 {	graph.files <- all.graph.files[seasons==season]
 	
 	# apply the static approach to each iteration
@@ -423,7 +423,7 @@ for(season in c(1))
 	V(g)$size <- 20 
 	E(g)$arrow.size <- 0.1
 	V(g)$label.cex <- 0.1
-	plot(g,edge.label=NA)
+#	plot(g,edge.label=NA)
 	#tkplot(g,edge.label=NA,vertex.label=V(g)$name,vertex.size=5)
 	#plot(g,edge.label=NA,rescale=FALSE,axes=FALSE,xlim=c(min(V(g)$x),max(V(g)$x)),ylim=c(min(V(g)$y),max(V(g)$y)),asp=NA)
 	
@@ -470,20 +470,29 @@ for(season in c(1))
 	}
 	
 	# convert the resulting matrix to dataframe, table and all the things the alluvial package needs.
-	t.limit <- 40
+	t.limit <- ncol(all.membersp) # TODO we can use a smaller value to only focus on the few first scences
 	sel.t <- 1:t.limit
 	singletons <- apply(single.mat[,sel.t],1,all)
 	sel.chars <- (1:nrow(all.membersp.chg))[!singletons]
 	data <- data.frame(apply(all.membersp.chg[sel.chars,sel.t],2,as.character))
 	colnames(data) <- sapply(strsplit(graph.files[sel.t],"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 	colors <- rep("BLUE",length(sel.chars))
-	colors[which(node.names[sel.chars]=="Jesse Pinkman")] <- "RED"
-	colors[which(node.names[sel.chars]=="Walter White")] <- "PURPLE"
-	data[["freq"]] <- 1
+#	colors[which(node.names[sel.chars]=="Jesse Pinkman")] <- "RED"
+#	colors[which(node.names[sel.chars]=="Walter White")] <- "PURPLE"
+#	colors[which(node.names[sel.chars]=="Jon Snow")] <- "PURPLE"
+#	colors[which(node.names[sel.chars]=="Tyrion Lannister")] <- "RED"
+#	colors[which(node.names[sel.chars]=="Arya Stark")] <- "GREEN"
+	colors[which(node.names[sel.chars]=="Francis Underwood")] <- "RED"
+	colors[which(node.names[sel.chars]=="Claire Underwood")] <- "PURPLE"
+data[["freq"]] <- 1
+pdf.file <- file.path(data.folder2,paste0("season",season,"_alluvial.pdf"))
+pdf(file=pdf.file, paper="special",width=ncol(all.membersp)*1, height=20)	
 	alluvial(data[,1:(ncol(data)-1)],
 			freq=data[,ncol(data)],
-			col=colors
+			col=colors,
+			cex=0.1
 	)
+dev.off()
 	
 #	data.frame(apply(matrix(sample(1:4,30,replace=T),nrow=6),2,as.character))
 #	x <- data.frame(factor(1:10),factor(c(rep(1,5),rep(2,5))),factor(sample(1:3,10,replace=TRUE)))

@@ -57,8 +57,8 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 
 # process each season separately
 ###############################################################################
-#for(season in seasons)
-for(season in seasons)
+#for(season in c(1))
+for(season in sort(unique(seasons)))
 {	graph.files <- all.graph.files[seasons==season]
 	
 	# apply the static approach to each iteration
