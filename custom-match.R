@@ -27,14 +27,14 @@ library("alluvial")		# to generate the alluvial diagrams
 # parameters
 ###############################################################################
 #data.folder <- "test"								# TODO folder containing the data (relatively to the current R workspace)
-data.folder <- "BB_dyn_ns"
+#data.folder <- "BB_dyn_ns"
 #data.folder <- "GoT_dyn_ns"
-#data.folder <- "HoC_dyn_ns"
+data.folder <- "HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
 static.method <- "Louvain"							# TODO static community detection method
 use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 
 min.jacc <- 0.3 									# TODO value of Jaccard's coefficient above which two communities are considered similar
-min.size <- 4										# TODO below this size, we don't try to match the communities
+min.size <- 1										# TODO below this size, we don't try to match the communities
 min.cent <- 0.2										# TODO below this centrality, the nodes are omitted from the simplified labels (so this option is purely graphical)
 
 
@@ -47,8 +47,10 @@ jaccard <- function(com1, com2, weights)
 	union.com <- union(com1,com2)
 	
 #	result <- length(intcom)/length(uncom)						# regular (unweighted) Jaccard
+	weights[which(weights==0)] <- 1e-12
 	result <- sum(weights[inter.com])/sum(weights[union.com]) 	# weighted Jaccard
-	return(result)	
+	#print(com1);print(com2);print(result)
+	return(result)
 }
 
 
@@ -66,8 +68,8 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 
 # process each season separately
 ###############################################################################
-#for(season in sort(unique(seasons)))
-for(season in c(2))
+for(season in sort(unique(seasons)))
+#for(season in c(3))
 {	graph.files <- all.graph.files[seasons==season]
 	
 	# apply the static approach to each iteration
@@ -477,13 +479,13 @@ for(season in c(2))
 	data <- data.frame(apply(all.membersp.chg[sel.chars,sel.t],2,as.character))
 	colnames(data) <- sapply(strsplit(graph.files[sel.t],"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 	colors <- rep("BLUE",length(sel.chars))
-#	colors[which(node.names[sel.chars]=="Jesse Pinkman")] <- "RED"
-#	colors[which(node.names[sel.chars]=="Walter White")] <- "PURPLE"
+	colors[which(node.names[sel.chars]=="Jesse Pinkman")] <- "RED"
+	colors[which(node.names[sel.chars]=="Walter White")] <- "PURPLE"
 #	colors[which(node.names[sel.chars]=="Jon Snow")] <- "PURPLE"
 #	colors[which(node.names[sel.chars]=="Tyrion Lannister")] <- "RED"
 #	colors[which(node.names[sel.chars]=="Arya Stark")] <- "GREEN"
-	colors[which(node.names[sel.chars]=="Francis Underwood")] <- "RED"
-	colors[which(node.names[sel.chars]=="Claire Underwood")] <- "PURPLE"
+#	colors[which(node.names[sel.chars]=="Francis Underwood")] <- "RED"
+#	colors[which(node.names[sel.chars]=="Claire Underwood")] <- "PURPLE"
 data[["freq"]] <- 1
 pdf.file <- file.path(data.folder2,paste0("season",season,"_alluvial.pdf"))
 pdf(file=pdf.file, paper="special",width=ncol(all.membersp)*0.9, height=20)	
