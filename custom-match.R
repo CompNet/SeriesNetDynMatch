@@ -27,9 +27,9 @@ library("alluvial")		# to generate the alluvial diagrams
 # parameters
 ###############################################################################
 #data.folder <- "test"								# TODO folder containing the data (relatively to the current R workspace)
-#data.folder <- "BB_dyn_ns"
+data.folder <- "BB_dyn_ns"
 #data.folder <- "GoT_dyn_ns"
-data.folder <- "HoC_dyn_ns"
+#data.folder <- "HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
 static.method <- "Louvain"							# TODO static community detection method
 use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 
@@ -66,8 +66,8 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 
 # process each season separately
 ###############################################################################
-for(season in sort(unique(seasons)))
-#for(season in c(1))
+#for(season in sort(unique(seasons)))
+for(season in c(2))
 {	graph.files <- all.graph.files[seasons==season]
 	
 	# apply the static approach to each iteration
@@ -486,7 +486,7 @@ for(season in sort(unique(seasons)))
 	colors[which(node.names[sel.chars]=="Claire Underwood")] <- "PURPLE"
 data[["freq"]] <- 1
 pdf.file <- file.path(data.folder2,paste0("season",season,"_alluvial.pdf"))
-pdf(file=pdf.file, paper="special",width=ncol(all.membersp)*1, height=20)	
+pdf(file=pdf.file, paper="special",width=ncol(all.membersp)*0.9, height=20)	
 	alluvial(data[,1:(ncol(data)-1)],
 			freq=data[,ncol(data)],
 			col=colors,
@@ -499,11 +499,6 @@ dev.off()
 #	colnames(x) <- c("a","b","c")
 #	df <- as.data.frame(table(x))
 #	alluvial(df[,1:3],freq=df[,4])
-	
-	
-	
 }
 
-# TODO
-# - sort the coms numbers so that the graphical order matches the... matches. smaller ids are at the bottom
-# - gather all the singletons in the same fake com ?
+# TODO there's a bug in the way the matched coms are placed in the alluvial diagram: some positions just don't make sense.
