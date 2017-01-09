@@ -12,9 +12,9 @@
 # 3) to set up the current R workspace, type (replace by your own path to this project):
 #		setwd("D:/Eclipse/workspaces/Networks/Series")
 # 4) then, to launch the script, type: 
-#		source("custom-match.R")
+#		source("src/rscripts/custom-match.R")
 # 
-# Author: Vincent Labatut 12/2016
+# Author: Vincent Labatut 01/2017
 ###############################################################################
 library("tools")		# basic R functions
 library("igraph")		# to handle graphs
@@ -26,10 +26,10 @@ library("alluvial")		# to generate the alluvial diagrams
 
 # parameters
 ###############################################################################
-#data.folder <- "test"								# TODO folder containing the data (relatively to the current R workspace)
-#data.folder <- "BB_dyn_ns"
-#data.folder <- "GoT_dyn_ns"
-data.folder <- "HoC_dyn_ns"
+#data.folder <- "data/test"							# TODO folder containing the data (relatively to the current R workspace)
+#data.folder <- "data/BB_dyn_ns"
+data.folder <- "data/GoT_dyn_ns"
+#data.folder <- "data/HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
 static.method <- "Louvain"							# TODO static community detection method
 use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 

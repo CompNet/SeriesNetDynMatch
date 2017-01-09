@@ -9,7 +9,7 @@
 #		setwd("xxxxxx")
 #    where xxxxxx is the path of this "Series" project.
 # 4) then, to launch the script, type: 
-#		source("mapequation.R")
+#		source("src/rscripts/mapequation.R")
 # 
 # Author: Vincent Labatut 12/2016
 ###############################################################################
@@ -21,10 +21,10 @@ library("igraph")
 
 # parameters
 ###############################################################################
-#data.folder <- "test"										# TODO folder containing the data (relatively to the current R workspace)
-data.folder <- "BB_dyn_ns"
-#data.folder <- "GoT_dyn_ns"
-#data.folder <- "HoC_dyn_ns"
+#data.folder <- "data/test"							# TODO folder containing the data (relatively to the current R workspace)
+#data.folder <- "data/BB_dyn_ns"
+data.folder <- "data/GoT_dyn_ns"
+#data.folder <- "data/HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
 dyncom.folder <- "conf_infomap_undir"						# TODO folder containing the MapEquation executable files
 dyncom.exec <- file.path(dyncom.folder,"conf-infomap")		# TODO executable file of the community detection program 

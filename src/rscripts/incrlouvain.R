@@ -8,7 +8,7 @@
 #		setwd("xxxxxx")
 #    where xxxxxx is the path of this "Series" project.
 # 4) then, to launch the script, type: 
-#		source("incrlouvain.R")
+#		source("src/rscripts/incrlouvain.R")
 # 
 # Author: Vincent Labatut 12/2016
 ###############################################################################
@@ -20,10 +20,10 @@ library("igraph")
 
 # parameters
 ###############################################################################
-data.folder <- "test"									# TODO folder containing the data (relatively to the current R workspace)
-#data.folder <- "BB_dyn_ns"
-#data.folder <- "GoT_dyn_ns"
-data.folder <- "HoC_dyn_ns"
+#data.folder <- "data/test"							# TODO folder containing the data (relatively to the current R workspace)
+#data.folder <- "data/BB_dyn_ns"
+data.folder <- "data/GoT_dyn_ns"
+#data.folder <- "data/HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
 louvain.folder <- "louvain"								# TODO folder containing the Louvain executable files
 convert.exec <- file.path(louvain.folder,"convert")		# TODO executable file of the conversion program 

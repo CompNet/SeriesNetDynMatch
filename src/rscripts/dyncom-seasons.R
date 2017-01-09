@@ -17,7 +17,7 @@
 # 3) to set up the current R workspace, type (replace by your own path to this project):
 #		setwd("D:/Eclipse/workspaces/Networks/Series")
 # 4) then, to launch the script, type: 
-#		source("dyncom-seasons.R")
+#		source("src/rscripts/dyncom-seasons.R")
 # 
 # Author: Vincent Labatut 12/2016
 ###############################################################################
@@ -30,10 +30,10 @@ library("igraph")
 
 # parameters
 ###############################################################################
-#data.folder <- "test"								# TODO folder containing the data (relatively to the current R workspace)
-data.folder <- "BB_dyn_ns"
-#data.folder <- "GoT_dyn_ns"
-#data.folder <- "HoC_dyn_ns"
+#data.folder <- "data/test"							# TODO folder containing the data (relatively to the current R workspace)
+#data.folder <- "data/BB_dyn_ns"
+data.folder <- "data/GoT_dyn_ns"
+#data.folder <- "data/HoC_dyn_ns"
 data.folder2 <- paste0(data.folder,"_updt")
 dyncom.folder <- "dyncom"							# TODO folder containing the dynamic-community executable files
 dyncom.exec <- file.path(dyncom.folder,"tracker")	# TODO executable file of the dynamic-community tracking program 
