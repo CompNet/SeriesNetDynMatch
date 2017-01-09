@@ -48,6 +48,8 @@ use.java <- TRUE									# TODO use the Java version of the postprocessing (much
 # get the list of original network files
 ###############################################################################
 all.graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
+scenes <- sapply(strsplit(all.graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
+all.graph.files <- c(sort(all.graph.files[scenes<1000]),sort(all.graph.files[scenes>=1000]))
 tmp <- strsplit(all.graph.files,split="_",fixed=TRUE)
 tmp2 <- sapply(tmp,function(v)v[2])
 seasons <- as.integer(substr(x=tmp2,start=2,stop=3))

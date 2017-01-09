@@ -50,6 +50,8 @@ use.java <- TRUE									# TODO use the Java version of the postprocessing (much
 # get the list of original network files
 ###############################################################################
 graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
+scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
+graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
 
 
 

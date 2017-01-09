@@ -70,6 +70,8 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 for(season in sort(unique(seasons)))
 #for(season in c(3))
 {	graph.files <- all.graph.files[seasons==season]
+	scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
+	graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
 	
 	# apply the static approach to each iteration
 	###############################################################################
