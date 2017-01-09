@@ -1,14 +1,13 @@
 # Detection of communities in dynamic TV Series network using static
-# approaches then matching communities in consecutive time slice through
-# a naive approach.
-# 
-# In this version of the script, we process each season separately.
+# approaches, then matching communities in consecutive time slices through
+# a naive approach. The script also generates the corresponding alluvial
+# diagrams. Seasons are processed separately.
 # 
 # Usage:
 # 1) possibly edit the above parameters
 # 2) open an R console
-# 3) to install the igraph library, type:
-#		install.packages("igraph")
+# 3) to install the required libraries, type:
+#		install.packages(c("igraph","alluvial"))
 # 3) to set up the current R workspace, type (replace by your own path to this project):
 #		setwd("D:/Eclipse/workspaces/Networks/Series")
 # 4) then, to launch the script, type: 
@@ -502,5 +501,3 @@ dev.off()
 #	df <- as.data.frame(table(x))
 #	alluvial(df[,1:3],freq=df[,4])
 }
-
-# TODO there's a bug in the way the matched coms are placed in the alluvial diagram: some positions just don't make sense.

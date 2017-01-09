@@ -1,5 +1,5 @@
 # Detection of communities in dynamic TV Series network using static
-# approaches then matching communities in consecutive time slice through
+# approaches then matching communities in consecutive time slices through
 # Derek Greene's dynamic-communty method.
 # https://github.com/derekgreene/dynamic-community
 # 
