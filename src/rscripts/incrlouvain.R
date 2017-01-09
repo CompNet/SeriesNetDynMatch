@@ -24,7 +24,7 @@ library("igraph")
 #data.folder <- "data/BB_dyn_ns"
 data.folder <- "data/GoT_dyn_ns"
 #data.folder <- "data/HoC_dyn_ns"
-data.folder2 <- paste0(data.folder,"_updt")
+res.folder <- paste0(data.folder,"_updt")
 louvain.folder <- "louvain"								# TODO folder containing the Louvain executable files
 convert.exec <- file.path(louvain.folder,"convert")		# TODO executable file of the conversion program 
 louvain.exec <- file.path(louvain.folder,"louvain")		# TODO executable file of the community detection program 
@@ -38,6 +38,7 @@ hierarchy.exec <- file.path(louvain.folder,"hierarchy")	# TODO executable file o
 graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
 scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
+scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 
 
 
@@ -125,7 +126,7 @@ for(i in 1:length(graph.files))
 # get the resulting communities, add them to original the graphml file as nodal attributes
 ###############################################################################
 cat("\n\n[",format(Sys.time(),"%a %d %b %Y %X"),"] Updating the graphs\n",sep="")
-dir.create(data.folder2, showWarnings=FALSE, recursive=TRUE)
+dir.create(res.folder, showWarnings=FALSE, recursive=TRUE)
 for(i in 1:length(graph.files))
 {	graph.file <- graph.files[i]
 	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]  Processing file '",graph.file,"'\n",sep="")
@@ -141,7 +142,7 @@ for(i in 1:length(graph.files))
 	
 	# add to the graph and record
 	V(g)$com <- coms
-	updt.file <- file.path(data.folder2,graph.file)
+	updt.file <- file.path(res.folder,graph.file)
 	write.graph(graph=g,file=updt.file,format="graphml")
 }
 

@@ -25,7 +25,7 @@ library("igraph")
 #data.folder <- "data/BB_dyn_ns"
 data.folder <- "data/GoT_dyn_ns"
 #data.folder <- "data/HoC_dyn_ns"
-data.folder2 <- paste0(data.folder,"_updt")
+res.folder <- paste0(data.folder,"_updt")
 dyncom.folder <- "conf_infomap_undir"						# TODO folder containing the MapEquation executable files
 dyncom.exec <- file.path(dyncom.folder,"conf-infomap")		# TODO executable file of the community detection program 
 
@@ -38,6 +38,7 @@ dyncom.exec <- file.path(dyncom.folder,"conf-infomap")		# TODO executable file o
 graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
 scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
+scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 
 
 

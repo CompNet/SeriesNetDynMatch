@@ -29,7 +29,7 @@ library("alluvial")		# to generate the alluvial diagrams
 #data.folder <- "data/BB_dyn_ns"
 data.folder <- "data/GoT_dyn_ns"
 #data.folder <- "data/HoC_dyn_ns"
-data.folder2 <- paste0(data.folder,"_updt")
+res.folder <- paste0(data.folder,"_updt")
 static.method <- "Louvain"							# TODO static community detection method
 use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 
 min.jacc <- 0.3 									# TODO value of Jaccard's coefficient above which two communities are considered similar
@@ -58,6 +58,9 @@ jaccard <- function(com1, com2, weights)
 # get the list of original network files
 ###############################################################################
 all.graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
+scenes <- sapply(strsplit(all.graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
+all.graph.files <- c(sort(all.graph.files[scenes<1000]),sort(all.graph.files[scenes>=1000]))
+scenes <- sapply(strsplit(all.graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 tmp <- strsplit(all.graph.files,split="_",fixed=TRUE)
 tmp2 <- sapply(tmp,function(v)v[2])
 seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
@@ -70,8 +73,6 @@ seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
 for(season in sort(unique(seasons)))
 #for(season in c(3))
 {	graph.files <- all.graph.files[seasons==season]
-	scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
-	graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
 	
 	# apply the static approach to each iteration
 	###############################################################################
@@ -143,9 +144,9 @@ for(season in sort(unique(seasons)))
 			writeLines(comstr,con=comlist.file)
 			
 			# add as an attribute to the graph and record a copy
-			dir.create(data.folder2, showWarnings=FALSE, recursive=TRUE)
+			dir.create(res.folder, showWarnings=FALSE, recursive=TRUE)
 			V(g)$com <- membership(coms)
-			updt.file <- file.path(data.folder2,graph.file)
+			updt.file <- file.path(res.folder,graph.file)
 			cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Recording file '",updt.file,"'\n",sep="")
 			write.graph(graph=g,file=updt.file,format="graphml")
 		}
@@ -431,7 +432,7 @@ for(season in sort(unique(seasons)))
 	#plot(g,edge.label=NA,rescale=FALSE,axes=FALSE,xlim=c(min(V(g)$x),max(V(g)$x)),ylim=c(min(V(g)$y),max(V(g)$y)),asp=NA)
 	
 	# record
-	result.file <- file.path(data.folder2,paste0("season",season,".graphml"))
+	result.file <- file.path(res.folder,paste0("season",season,".graphml"))
 	write.graph(graph=g,file=result.file,format="graphml")
 	
 	
@@ -488,7 +489,7 @@ for(season in sort(unique(seasons)))
 #	colors[which(node.names[sel.chars]=="Francis Underwood")] <- "RED"
 #	colors[which(node.names[sel.chars]=="Claire Underwood")] <- "PURPLE"
 data[["freq"]] <- 1
-pdf.file <- file.path(data.folder2,paste0("season",season,"_alluvial.pdf"))
+pdf.file <- file.path(res.folder,paste0("season",season,"_alluvial.pdf"))
 pdf(file=pdf.file, paper="special",width=ncol(all.membersp)*0.9, height=20)	
 	alluvial(data[,1:(ncol(data)-1)],
 			freq=data[,ncol(data)],

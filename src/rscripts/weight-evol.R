@@ -26,67 +26,67 @@ library("igraph")		# to handle graphs
 series.name <- "GoT"
 #series.name <- "HoC"
 if(series.name=="BB")
-{	# names of the characters to plot
+{	# TODO names of the characters to plot
 	char.names <- list(											
 		c("Walter White","Tuco Salamanca"),
 		c("Walter White","Jesse Pinkman"),
 		c("Walter White","Saul Goodman","Mike Ehrmantraut"),
 		c("Walter White","Skyler White","Walter White Jr.")
 	)
-	# vertical marks displayed in the character plot (possibly none)
+	# TODO vertical marks displayed in the character plot (possibly none)
 	char.marks <- list(
 		list("Tuco's death"=135),
 		list(),
 		list(),
 		list()
 	)
-	# names of the relationships to plot
+	# TODO names of the relationships to plot
 	link.names <- list(
 		c("Walter White","Jesse Pinkman")
 	)
-	# vertical marks displayed in the link plot (possibly none)
+	# TODO vertical marks displayed in the link plot (possibly none)
 	link.marks <- list(
 		list()
 	)
 }else if(series.name=="GoT")
-{	# names of the characters to plot
+{	# TODO names of the characters to plot
 	char.names <- list(
 		c("Daenerys Targaryen","Tyrion Lannister"),
 		c("Rickon Stark","Catelyn Stark","Brandon Stark","Eddard Stark","Sansa Stark","Arya Stark","Robb Stark","Jon Snow"),
 		c("Tywin Lannister","Jaime Lannister","Cersei Lannister","Tyrion Lannister")
 	)
-	# vertical marks displayed in the character plot (possibly none)
+	# TODO vertical marks displayed in the character plot (possibly none)
 	char.marks <- list(
 		list("Tyrion becomes the King's Hand"=220),
 		list(),
 		list()
 	)
-	# names of the relationships to plot
+	# TODO names of the relationships to plot
 	link.names <- list(
 		c("Jaime Lannister","Cersei Lannister","Jaime Lannister","Tyrion Lannister","Cersei Lannister","Tyrion Lannister")
 	)
-	# vertical marks displayed in the link plot (possibly none)
+	# TODO vertical marks displayed in the link plot (possibly none)
 	link.marks <- list(
 		list("Tyrion becomes the King's Hand"=220)
 	)
 }else if(series.name=="HoC")
-{	# names of the characters to plot
+{	# TODO names of the characters to plot
 	char.names <- list(
 		c("Francis Underwood","Claire Underwood"),
 		c("Francis Underwood","Garrett Walker"),
 		c("Zoe Barnes","Lucas Goodwin")
 	)
-	# vertical marks displayed in the character plot (possibly none)
+	# TODO vertical marks displayed in the character plot (possibly none)
 	char.marks <- list(
 		list(),
 		list(),
 		list()
 	)
-	# names of the relationships to plot
+	# TODO names of the relationships to plot
 	link.names <- list(
 		c("Francis Underwood","Claire Underwood","Francis Underwood","Martin Spinella","Lucas Goodwin","Gavin Orsay")
 	)
-	# vertical marks displayed in the link plot (possibly none)
+	# TODO vertical marks displayed in the link plot (possibly none)
 	link.marks <- list(
 		list("F.Underwood/M.Spinella fight"=125)
 	)
@@ -132,6 +132,7 @@ for(type in c("ns","ts10","ts40"))
 	graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
 	scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 	graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
+	scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 	
 	# load the graphs, including the link weights
 	###############################################################################

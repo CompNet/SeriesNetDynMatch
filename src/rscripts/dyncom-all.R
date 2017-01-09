@@ -35,7 +35,7 @@ library("igraph")
 #data.folder <- "data/BB_dyn_ns"
 data.folder <- "data/GoT_dyn_ns"
 #data.folder <- "data/HoC_dyn_ns"
-data.folder2 <- paste0(data.folder,"_updt")
+res.folder <- paste0(data.folder,"_updt")
 dyncom.folder <- "dyncom"							# TODO folder containing the dynamic-community executable files
 dyncom.exec <- file.path(dyncom.folder,"tracker")	# TODO executable file of the dynamic-community tracking program 
 dyncompostj.folder <- "dyncompostj"					# TODO folder containing the Java class for the postprocessing of dynamic-community results
@@ -52,6 +52,7 @@ use.java <- TRUE									# TODO use the Java version of the postprocessing (much
 graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
 scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
+scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 
 
 
@@ -115,9 +116,9 @@ for(graph.file in graph.files)
 		writeLines(comstr,con=comlist.file)
 		
 		# add as an attribute to the graph and record a copy
-		dir.create(data.folder2, showWarnings=FALSE, recursive=TRUE)
+		dir.create(res.folder, showWarnings=FALSE, recursive=TRUE)
 		V(g)$com <- membership(coms)
-		updt.file <- file.path(data.folder2,graph.file)
+		updt.file <- file.path(res.folder,graph.file)
 		cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Recording file '",updt.file,"'\n",sep="")
 		write.graph(graph=g,file=updt.file,format="graphml")
 	}
@@ -163,7 +164,7 @@ if(use.java)
 	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"] Using the Java version of the post-processing '",cmd,"'\n",sep="")
 	system(cmd)
 	
-	result.file <- file.path(data.folder2,"all.graphml")
+	result.file <- file.path(res.folder,"all.graphml")
 	g <- read.graph(file=result.file,format="graphml");
 	V(g)$x <- V(g)$x * 100 
 	V(g)$y <- V(g)$y * 100
@@ -171,9 +172,9 @@ if(use.java)
 	E(g)$arrow.size <- 0.1
 	V(g)$label.cex <- 0.1
 	plot(g,edge.label=NA)
-	second.file <- file.path(data.folder2,paste0("all_bis.graphml"))
+	second.file <- file.path(res.folder,paste0("all_bis.graphml"))
 	write.graph(g,file=second.file,format="graphml")
-	second.file <- file.path(data.folder2,paste0("all_bis.net"))
+	second.file <- file.path(res.folder,paste0("all_bis.net"))
 	write.graph(g,file=second.file,format="pajek")
 #	stop()
 }else
@@ -245,7 +246,7 @@ if(use.java)
 		}
 	}
 	g <- simplify(graph=g,remove.multiple=TRUE,edge.attr.comb="first")
-	result.file <- file.path(data.folder2,"all.graphml")
+	result.file <- file.path(res.folder,"all.graphml")
 	write.graph(graph=g,file=result.file,format="graphml")
 	#plot(g)
 }

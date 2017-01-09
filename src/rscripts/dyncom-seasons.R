@@ -34,7 +34,7 @@ library("igraph")
 #data.folder <- "data/BB_dyn_ns"
 data.folder <- "data/GoT_dyn_ns"
 #data.folder <- "data/HoC_dyn_ns"
-data.folder2 <- paste0(data.folder,"_updt")
+res.folder <- paste0(data.folder,"_updt")
 dyncom.folder <- "dyncom"							# TODO folder containing the dynamic-community executable files
 dyncom.exec <- file.path(dyncom.folder,"tracker")	# TODO executable file of the dynamic-community tracking program 
 dyncompostj.folder <- "dyncompostj"					# TODO folder containing the Java class for the postprocessing of dynamic-community results
@@ -50,6 +50,7 @@ use.java <- TRUE									# TODO use the Java version of the postprocessing (much
 all.graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
 scenes <- sapply(strsplit(all.graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 all.graph.files <- c(sort(all.graph.files[scenes<1000]),sort(all.graph.files[scenes>=1000]))
+scenes <- sapply(strsplit(all.graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 tmp <- strsplit(all.graph.files,split="_",fixed=TRUE)
 tmp2 <- sapply(tmp,function(v)v[2])
 seasons <- as.integer(substr(x=tmp2,start=2,stop=3))
@@ -122,9 +123,9 @@ for(season in sort(unique(seasons)))
 			writeLines(comstr,con=comlist.file)
 			
 			# add as an attribute to the graph and record a copy
-			dir.create(data.folder2, showWarnings=FALSE, recursive=TRUE)
+			dir.create(res.folder, showWarnings=FALSE, recursive=TRUE)
 			V(g)$com <- membership(coms)
-			updt.file <- file.path(data.folder2,graph.file)
+			updt.file <- file.path(res.folder,graph.file)
 			cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Recording file '",updt.file,"'\n",sep="")
 			write.graph(graph=g,file=updt.file,format="graphml")
 		}
@@ -171,7 +172,7 @@ for(season in sort(unique(seasons)))
 		cat("[",format(Sys.time(),"%a %d %b %Y %X"),"] Using the Java version of the post-processing '",cmd,"'\n",sep="")
 		system(cmd)
 		
-		result.file <- file.path(data.folder2,paste0("season",season,".graphml"))
+		result.file <- file.path(res.folder,paste0("season",season,".graphml"))
 		g <- read.graph(file=result.file,format="graphml");
 		V(g)$x <- V(g)$x * 100 
 		V(g)$y <- V(g)$y * 100
@@ -180,9 +181,9 @@ for(season in sort(unique(seasons)))
 		V(g)$label.cex <- 0.1
 		plot(g,edge.label=NA)
 #		tkplot(g,edge.label=NA,vertex.label=V(g)$name,vertex.size=5)		
-		second.file <- file.path(data.folder2,paste0("season",season,"_bis.graphml"))
+		second.file <- file.path(res.folder,paste0("season",season,"_bis.graphml"))
 		write.graph(g,file=second.file,format="graphml")
-		second.file <- file.path(data.folder2,paste0("season",season,"_bis.net"))
+		second.file <- file.path(res.folder,paste0("season",season,"_bis.net"))
 		write.graph(g,file=second.file,format="pajek")
 #		stop()
 	}
@@ -255,7 +256,7 @@ for(season in sort(unique(seasons)))
 			}
 		}
 		g <- simplify(graph=g,remove.multiple=TRUE,edge.attr.comb="first")
-		result.file <- file.path(data.folder2,paste0("season",season,".graphml"))
+		result.file <- file.path(res.folder,paste0("season",season,".graphml"))
 		write.graph(graph=g,file=result.file,format="graphml")
 #		plot(g)
 	}
@@ -274,7 +275,7 @@ for(season in sort(unique(seasons)))
 #    cat("jaccard: ",jacc,"\n",sep="")
 #}
 #
-#result.file <- file.path(data.folder2,paste0("season1_bis.graphml"))
+#result.file <- file.path(res.folder,paste0("season1_bis.graphml"))
 #g <- read.graph(file=result.file,format="graphml")
 #
 #move.com.y <- function(names, ref)
