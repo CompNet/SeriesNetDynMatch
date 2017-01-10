@@ -25,16 +25,48 @@ library("alluvial")		# to generate the alluvial diagrams
 
 # parameters
 ###############################################################################
-#data.folder <- "data/test"							# TODO folder containing the data (relatively to the current R workspace)
-#data.folder <- "data/BB_dyn_ns"
-data.folder <- "data/GoT_dyn_ns"
-#data.folder <- "data/HoC_dyn_ns"
-res.folder <- paste0(data.folder,"_updt")
-static.method <- "Louvain"							# TODO static community detection method
-use.cache <- TRUE									# TODO use the cached file instead of community detection (only use if community detection was performed once before) 
-min.jacc <- 0.3 									# TODO value of Jaccard's coefficient above which two communities are considered similar
-min.size <- 1										# TODO below this size, we don't try to match the communities
-min.cent <- 0.2										# TODO below this centrality, the nodes are omitted from the simplified labels (so this option is purely graphical)
+series.name <- "BB"				# TODO name of the series to process
+#series.name <- "GoT"
+#series.name <- "HoC"
+static.method <- "Louvain"			# TODO static community detection method
+use.cache <- TRUE					# TODO if FALSE, forces the community detection, otherwise use the cached file (provided it already exists) 
+min.jacc <- 0.3 					# TODO value of Jaccard's coefficient above which two communities are considered similar during matching
+min.size <- 1						# TODO below this size, we don't try to match the communities
+min.cent <- 0.2						# TODO below this centrality, the nodes are omitted from the simplified labels (so this option is purely graphical)
+if(series.name=="BB")
+{	# TODO tracked characters
+	tracked.chars <- list(
+		"Jesse Pinkman"="RED",
+		"Walter White"="PURPLE"
+	)
+}else if(series.name=="GoT")
+{	# TODO tracked characters
+	tracked.chars <- list(
+		"Jon Snow"="PURPLE",
+		"Tyrion Lannister"="RED",
+		"Arya Stark"="GREEN"
+	)	
+}else if(series.name=="GoT")
+{	# TODO tracked characters
+	tracked.chars <- list(
+		"Francis Underwood"="RED",
+		"Claire Underwood"="PURPLE"
+	)
+}
+
+
+
+
+# folders
+###############################################################################
+data.folder <- "data"														# main data folder
+input.folder <- file.path(data.folder,paste0(series.name,"_dyn_ns"))		# data containing the original networks
+clstr.folder <- paste0(input.folder,"_clstr")								# data in which to record the community detection results 
+dir.create(clstr.folder, showWarnings=FALSE, recursive=TRUE)
+match.folder <- paste0(input.folder,"_match")								# data in which to record the results of the matching
+dir.create(match.folder, showWarnings=FALSE, recursive=TRUE)
+alluv.folder <- paste0(input.folder,"_alluv")								# data in which to record the alluvial diagrams
+dir.create(alluv.folder, showWarnings=FALSE, recursive=TRUE)
 
 
 
@@ -57,7 +89,7 @@ jaccard <- function(com1, com2, weights)
 
 # get the list of original network files
 ###############################################################################
-all.graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
+all.graph.files <- list.files(path=input.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
 scenes <- sapply(strsplit(all.graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 all.graph.files <- c(sort(all.graph.files[scenes<1000]),sort(all.graph.files[scenes>=1000]))
 scenes <- sapply(strsplit(all.graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
@@ -85,7 +117,7 @@ for(season in sort(unique(seasons)))
 	{	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]   Processing file '",graph.file,"'\n",sep="")
 		
 		# read the graphml file
-		graphml.file <- file.path(data.folder,graph.file)
+		graphml.file <- file.path(input.folder,graph.file)
 		g <- read_graph(file=graphml.file,format="graphml")
 		cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Number of links: ",gsize(g),"\n",sep="")
 		node.names <- V(g)$label
@@ -94,10 +126,10 @@ for(season in sort(unique(seasons)))
 		else
 			integ.mat <- integ.mat + as_adjacency_matrix(graph=g, attr="weight")
 		
-		# execute the static approach
-		if(use.cache)
+		# use the cache...
+		comlist.file <- file.path(clstr.folder,paste0(file_path_sans_ext(basename(graphml.file)),"_cl.txt"))
+		if(use.cache && file.exists(comlist.file))
 		{	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Just loading the file\n",sep="")
-			comlist.file <- file.path(getwd(),paste0(file_path_sans_ext(graphml.file),"_cl.txt"))
 			comlist.txt <- readLines(comlist.file)
 			comlist <- strsplit(comlist.txt,split=" ",fixed=TRUE)
 			comlist <- lapply(comlist,as.integer)
@@ -114,6 +146,7 @@ for(season in sort(unique(seasons)))
 			else
 				all.membersp <- cbind(all.membersp,membersp)
 		}
+		# ...or execute the static approach
 		else
 		{	cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Applying community detection method '",static.method,"'\n",sep="")
 			if(static.method=="Infomap")
@@ -134,7 +167,6 @@ for(season in sort(unique(seasons)))
 				coms <- cluster_walktrap(graph=g,weights=E(g)$weight,membership=TRUE)
 			
 			# record as a list of communities
-			comlist.file <- file.path(getwd(),paste0(file_path_sans_ext(graphml.file),"_cl.txt"))
 			comlist <- communities(coms)
 			comlist2 <- list()
 			for(c in 1:length(comlist))
@@ -144,16 +176,20 @@ for(season in sort(unique(seasons)))
 			writeLines(comstr,con=comlist.file)
 			
 			# add as an attribute to the graph and record a copy
-			dir.create(res.folder, showWarnings=FALSE, recursive=TRUE)
-			V(g)$com <- membership(coms)
-			updt.file <- file.path(res.folder,graph.file)
+			membersp <- membership(coms)
+			if(all(is.na(all.membersp)))
+				all.membersp <- membersp
+			else
+				all.membersp <- cbind(all.membersp,membersp)
+			V(g)$com <- membersp
+			updt.file <- file.path(clstr.folder,graph.file)
 			cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Recording file '",updt.file,"'\n",sep="")
 			write.graph(graph=g,file=updt.file,format="graphml")
 		}
 	}
 	colnames(all.membersp) <- NULL
 	# record the names
-	char.file <- file.path(data.folder,"characters.txt")
+	char.file <- file.path(clstr.folder,"characters.txt")
 	write.table(x=node.names,file=char.file,row.names=FALSE,col.names=FALSE)
 	
 	
@@ -164,7 +200,7 @@ for(season in sort(unique(seasons)))
 	cat("\n\n[",format(Sys.time(),"%a %d %b %Y %X"),"] Process centrality in aggregated network (season #",season,")\n",sep="")
 	integ.g <- graph_from_adjacency_matrix(adjmatrix=integ.mat, mode="undirected", weighted=TRUE)
 	cent <- eigen_centrality(graph=integ.g, scale=TRUE, weights=E(integ.g)$weight)$vector
-	cent.file <- file.path(data.folder,paste0("season",season,"_centr.txt"))
+	cent.file <- file.path(clstr.folder,paste0("season",season,"_centr.txt"))
 	write.table(x=cent,file=cent.file,row.names=FALSE,col.names=FALSE)
 	
 	
@@ -173,9 +209,6 @@ for(season in sort(unique(seasons)))
 	# track the communities using a custom method
 	###############################################################################
 	cat("\n\n[",format(Sys.time(),"%a %d %b %Y %X"),"] Tracking the communities for season #",season,"\n",sep="")
-	
-#	# only keep communities larger than a certain size
-#	filtered.coms <- lapply(all.coms,function(time.coms) time.coms[which(sapply(time.coms,length)>3)])
 	
 	# links between communities in the final graph 
 	link.mat <- NA
@@ -257,63 +290,6 @@ for(season in sort(unique(seasons)))
 		E(g)[i]$weight=length(inter.com)
 		E(g)[i]$jaccard=link.mat[i,5]		
 	}
-	
-#	# process positions
-#	V(g)$x <- as.numeric(sapply(V(g)$name, function(nm) strsplit(nm,"-",fixed=TRUE)[[1]][1]))
-#	done <- c()
-#	roots <- which(degree(g,mode="in")==0)
-#	V(g)[roots]$y <- 1:length(roots)*100
-#	V(g)[roots]$ysup <- V(g)[roots]$y + 100
-#	fringe <- roots
-#	while(length(fringe)>0)
-#	{	node <- fringe[1]
-#		fringe <- fringe[-1]
-#		if(!(node %in% done))
-#		{	done <- c(done,node)
-#			# get neighbors		
-#cat("node=",node,"\n",sep="")	
-#			neighs <- ego(graph=g,order=1,nodes=node,mode="out")[[1]][-1]
-#cat("  neighs=",paste(neighs,collapse=" ")," (",length(neighs)>1,")\n",sep="")	
-#			# update positions
-#cat("  y=",V(g)[node]$y," ysup=",V(g)[node]$ysup,"\n",sep="")
-#			if(length(neighs)==1)
-#			{	V(g)[neighs]$y <- V(g)[node]$y
-#				V(g)[neighs]$ysup <- V(g)[node]$ysup
-#				fringe <- c(fringe,neighs)
-#			}
-#			else if(length(neighs)>1)
-#			{	# identify the most similar child
-#				same <- 1
-#				same.jacc <- edge_attr(g,"jaccard",E(g)[node %->% neighs[1]])
-#				for(n in 2:length(neighs))
-#				{	jacc <- edge_attr(g,"jaccard",E(g)[node %->% neighs[n]])
-#					if(jacc>same.jacc)
-#					{	same <- n
-#						same.jacc <- jacc
-#					}
-#				}
-#cat("  same=",same," same.jacc=",same.jacc,"\n",sep="")
-#				neighs <- c(neighs[same],neighs[-same])
-##				V(g)[neighs[same]]$y <- V(g)[node]$y
-##				V(g)[neighs[same]]$ysup <- V(g)[node]$ysup
-##				fringe <- c(fringe,neighs[same])
-##				neighs <- neighs[-same]
-#				# process the rest of the children
-#				pos <- seq(from=V(g)[node]$y,to=V(g)[node]$ysup,by=(V(g)[node]$ysup-V(g)[node]$y)/length(neighs))
-#				V(g)[neighs]$y <- pos[1:(length(pos)-1)]
-#				V(g)[neighs]$ysup <- pos[2:length(pos)]
-#				fringe <- c(fringe,neighs)
-#cat("  neighs=",paste(neighs,collapse=" "),"\n",sep="")
-#cat("  y=",paste(pos[2:(length(pos)-1)],collapse=" "),"\n",sep="")	
-#cat("  ysup=",paste(pos[3:length(pos)],collapse=" "),"\n",sep="")	
-#			}
-#		}
-#	}
-#	g <- delete_vertex_attr(g,"ysup")
-#	# normalize y positions
-#	vals <- sort(unique(V(g)$y))
-#	idx <- match(V(g)$y,vals)
-#	V(g)$y <- idx
 	
 	# process positions
 	V(g)$x <- as.numeric(sapply(V(g)$name, function(nm) strsplit(nm,"-",fixed=TRUE)[[1]][1]))
@@ -432,7 +408,7 @@ for(season in sort(unique(seasons)))
 	#plot(g,edge.label=NA,rescale=FALSE,axes=FALSE,xlim=c(min(V(g)$x),max(V(g)$x)),ylim=c(min(V(g)$y),max(V(g)$y)),asp=NA)
 	
 	# record
-	result.file <- file.path(res.folder,paste0("season",season,".graphml"))
+	result.file <- file.path(match.folder,paste0("season",season,".graphml"))
 	write.graph(graph=g,file=result.file,format="graphml")
 	
 	
@@ -481,26 +457,18 @@ for(season in sort(unique(seasons)))
 	data <- data.frame(apply(all.membersp.chg[sel.chars,sel.t],2,as.character))
 	colnames(data) <- sapply(strsplit(graph.files[sel.t],"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 	colors <- rep("BLUE",length(sel.chars))
-	colors[which(node.names[sel.chars]=="Jesse Pinkman")] <- "RED"
-	colors[which(node.names[sel.chars]=="Walter White")] <- "PURPLE"
-#	colors[which(node.names[sel.chars]=="Jon Snow")] <- "PURPLE"
-#	colors[which(node.names[sel.chars]=="Tyrion Lannister")] <- "RED"
-#	colors[which(node.names[sel.chars]=="Arya Stark")] <- "GREEN"
-#	colors[which(node.names[sel.chars]=="Francis Underwood")] <- "RED"
-#	colors[which(node.names[sel.chars]=="Claire Underwood")] <- "PURPLE"
-data[["freq"]] <- 1
-pdf.file <- file.path(res.folder,paste0("season",season,"_alluvial.pdf"))
-pdf(file=pdf.file, paper="special",width=ncol(all.membersp)*0.9, height=20)	
-	alluvial(data[,1:(ncol(data)-1)],
-			freq=data[,ncol(data)],
-			col=colors,
-			cex=0.1
-	)
-dev.off()
-	
-#	data.frame(apply(matrix(sample(1:4,30,replace=T),nrow=6),2,as.character))
-#	x <- data.frame(factor(1:10),factor(c(rep(1,5),rep(2,5))),factor(sample(1:3,10,replace=TRUE)))
-#	colnames(x) <- c("a","b","c")
-#	df <- as.data.frame(table(x))
-#	alluvial(df[,1:3],freq=df[,4])
+	for(i in 1:length(tracked.chars))
+	{	char.name <- names(tracked.chars)[i]
+		char.color <- tracked.chars[[i]]
+		colors[which(node.names[sel.chars]==char.name)] <- char.color
+	}
+	data[["freq"]] <- 1
+	pdf.file <- file.path(alluv.folder,paste0("season",season,"_alluvial.pdf"))
+	pdf(file=pdf.file, paper="special",width=ncol(all.membersp)*0.9, height=20)	
+		alluvial(data[,1:(ncol(data)-1)],
+				freq=data[,ncol(data)],
+				col=colors,
+				cex=0.1
+		)
+	dev.off()
 }

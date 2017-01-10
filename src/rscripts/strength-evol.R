@@ -22,8 +22,8 @@ library("igraph")		# to handle graphs
 
 # parameters
 ###############################################################################
-#series.name <- "BB"										# TODO name of the series to process
-series.name <- "GoT"
+series.name <- "BB"										# TODO name of the series to process
+#series.name <- "GoT"
 #series.name <- "HoC"
 if(series.name=="BB")
 {	# TODO names of the characters to plot
@@ -97,8 +97,8 @@ if(series.name=="BB")
 
 # folders
 ###############################################################################
-data.folder <- "data"
-res.folder <- file.path(data.folder,paste0(series.name,"_dyn","_centr"))
+data.base <- "data"
+res.folder <- file.path(data.base,paste0(series.name,"_dyn_strength"))
 dir.create(res.folder, showWarnings=FALSE, recursive=TRUE)
 
 
@@ -125,11 +125,11 @@ palette <- c(
 # process each type of network
 for(type in c("ns","ts10","ts40"))
 {	# setup the folders
-	data.folder <- paste0("data/",series.name,"_dyn_",type)
+	input.folder <- file.path(data.base,paste0(series.name,"_dyn_",type))
 	
 	# get the list of network files
 	###############################################################################
-	graph.files <- list.files(path=data.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
+	graph.files <- list.files(path=input.folder,pattern="*.graphml", all.files=FALSE, full.names=FALSE, recursive=FALSE, ignore.case=FALSE, include.dirs=FALSE, no..=TRUE)
 	scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
 	graph.files <- c(sort(graph.files[scenes<1000]),sort(graph.files[scenes>=1000]))
 	scenes <- sapply(strsplit(graph.files,"[_.]",fixed=FALSE),function(s) as.integer(s[3]))
@@ -144,7 +144,7 @@ for(type in c("ns","ts10","ts40"))
 		cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]   Processing file '",graph.file,"'\n",sep="")
 		
 		# read the graphml file
-		graphml.file <- file.path(data.folder,graph.file)
+		graphml.file <- file.path(input.folder,graph.file)
 		g <- read_graph(file=graphml.file,format="graphml")
 		cat("[",format(Sys.time(),"%a %d %b %Y %X"),"]    Number of links: ",gsize(g),"\n",sep="")
 		node.names <- V(g)$label
@@ -251,4 +251,4 @@ for(type in c("ns","ts10","ts40"))
 	}
 }
 
-#TODO jon vs. ygritte
+#TODO check jon vs. ygritte
