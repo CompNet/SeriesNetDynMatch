@@ -22,9 +22,9 @@ library("igraph")		# to handle graphs
 
 # parameters
 ###############################################################################
-#series.name <- "BB"										# TODO name of the series to process
+series.name <- "BB"										# TODO name of the series to process
 #series.name <- "GoT"
-series.name <- "HoC"
+#series.name <- "HoC"
 if(series.name=="BB")
 {	# TODO last scene limit (or NA for all scenes), as numbered in the graph file names
 #	last.scene <- NA	# Everything
@@ -65,7 +65,10 @@ if(series.name=="BB")
 }else if(series.name=="GoT")
 {	# TODO last scene limit (or NA for all scenes), as numbered in the graph file names
 #	last.scene <- NA
-	last.scene <- 457	# S1-S2
+#	last.scene <- 457	# S1-S2
+#	last.scene <- 670	# S1-S3
+#	last.scene <- 857	# S1-S4
+	last.scene <- 1039	# S1-S5 (not all S5, just the scenes present in all 3 types of graphs)
 	# TODO names of the characters to plot
 	char.names <- list(
 		c("Daenerys Targaryen","Tyrion Lannister"),
@@ -87,17 +90,21 @@ if(series.name=="BB")
 	# TODO names of the relationships to plot
 	link.names <- list(
 		c("Jaime Lannister","Cersei Lannister","Jaime Lannister","Tyrion Lannister","Cersei Lannister","Tyrion Lannister"),
-		c("Jon Snow","Ygritte")
+		c("Jon Snow","Ygritte","Jon Snow","Samwell Tarly")
 	)
 	# TODO periods displayed in the link plot (possibly none)
 	link.periods <- list(
 		list(),
-		list("Romantic relationship"=c(100,400))
+#		list("Jon and Ygritte's relationship"=c(358,641),"Battle of Castle Black"=c(823,839))
+		list(" "=c(358,641)," "=c(847,869)) # estimated from summaries
+#		list()
 	)
 	# TODO vertical marks displayed in the link plot (possibly none)
 	link.marks <- list(
 		list("Tyrion becomes the King's Hand "=252),	# verified
-		list()
+#		list("Jon captures Ygritte "=358,"Jon and Ygritte have sex "=542,"Jon flees the Wildlings "=631,"Ygritte shoots Jon "=667,"Ygritte dies "=834)	# these are approximations based on summaries
+		list("Jon captures Ygritte "=358,"Jon and Ygritte have sex "=554,"Jon flees the Wildlings "=641,"Ygritte shoots Jon "=679,"Ygritte dies "=855)	# these are approximations based on summaries
+#		list()
 	)
 }else if(series.name=="HoC")
 {	# TODO last scene limit (or NA for all scenes), as numbered in the graph file names
@@ -166,7 +173,7 @@ palette <- c(
 # get the character strengths
 ###############################################################################
 # process each type of network
-#for(type in c("ns"))
+#for(type in c("ts10"))
 for(type in c("ns","ts10","ts40"))
 {	# setup the folders
 	input.folder <- file.path(data.base,paste0(series.name,"_dyn_",type))
@@ -218,7 +225,7 @@ for(type in c("ns","ts10","ts40"))
 			idx <- get.edge.ids(graph=g, vp=link.names[[grp]])
 			vals <- rep(0,length(idx))
 			wg <- E(g)[idx]$weight
-			vals[which(wg!=0)] <- wg
+			vals[which(idx!=0)] <- wg
 			link.str[[grp]][,f] <- vals
 		}
 	}
