@@ -10,7 +10,7 @@
 # 3) to set up the current R workspace, type (replace by your own path to this project):
 #		setwd("D:/Eclipse/workspaces/Networks/Series")
 # 4) then, to launch the script, type: 
-#		source("src/rscripts/strength-evol.R")
+#		source("src/strength-evol.R")
 # 
 # Author: Vincent Labatut 01/2017
 ###############################################################################
@@ -22,8 +22,8 @@ library("igraph")		# to handle graphs
 
 # parameters
 ###############################################################################
-series.name <- "BB"										# TODO name of the series to process
-#series.name <- "GoT"
+#series.name <- "BB"										# TODO name of the series to process
+series.name <- "GoT"
 #series.name <- "HoC"
 if(series.name=="BB")
 {	# TODO last scene limit (or NA for all scenes), as numbered in the graph file names
@@ -45,7 +45,7 @@ if(series.name=="BB")
 	)
 	# TODO vertical marks displayed in the character plot (possibly none)
 	char.marks <- list(
-		list("Tuco's death "=172),	# verified
+		list("Tuco's death "=167),	# verified (172)
 		list(),
 		list(),
 		list()
@@ -83,7 +83,7 @@ if(series.name=="BB")
 	)
 	# TODO vertical marks displayed in the character plot (possibly none)
 	char.marks <- list(
-		list("Tyrion becomes the King's Hand "=252),	# verified
+		list("Tyrion becomes the King's Hand "=235),	# verified (252)
 		list(),
 		list()
 	)
@@ -102,7 +102,7 @@ if(series.name=="BB")
 	# TODO vertical marks displayed in the link plot (possibly none)
 	link.marks <- list(
 		list("Tyrion becomes the King's Hand "=252),	# verified
-#		list("Jon captures Ygritte "=358,"Jon and Ygritte have sex "=542,"Jon flees the Wildlings "=631,"Ygritte shoots Jon "=667,"Ygritte dies "=834)	# these are approximations based on summaries
+#		list("Jon captures Ygritte "=349,"Jon and Ygritte have sex "=543,"Jon flees the Wildlings "=637,"Ygritte shoots Jon "=662,"Ygritte dies "=836)	# these are approximations based on summaries
 		list("Jon captures Ygritte "=358,"Jon and Ygritte have sex "=554,"Jon flees the Wildlings "=641,"Ygritte shoots Jon "=679,"Ygritte dies "=855)	# these are approximations based on summaries
 #		list()
 	)
@@ -265,6 +265,11 @@ for(type in c("ns","ts10","ts40"))
 			{	for(i in 1:length(char.marks[[grp]]))
 #				{	scene <- char.marks[[grp]][i]
 				{	scene <- which(scenes==char.marks[[grp]][[i]])
+					while(length(scene)==0)
+					{	cat("Scene ",char.marks[[grp]][[i]]," is not present: let's try using the next one.")
+						char.marks[[grp]][[i]] <- char.marks[[grp]][[i]] + 1
+						scene <- which(scenes==char.marks[[grp]][[i]])
+					}
 					abline(v=scene,
 							col="GREY30", lwd=2) #, lty=3
 					text(x=scene, y=grconvertY(1,from='npc'), 
@@ -312,7 +317,17 @@ for(type in c("ns","ts10","ts40"))
 #				{	start.scene <- link.periods[[grp]][[i]][1]
 #					end.scene <- link.periods[[grp]][[i]][2]
 				{	start.scene <- which(scenes==link.periods[[grp]][[i]][1])
+					while(length(start.scene)==0)
+					{	cat("Start scene ",link.periods[[grp]][[i]][1]," is not present: let's try using the next one.")
+						link.periods[[grp]][[i]][1] <- link.periods[[grp]][[i]][1] + 1
+						start.scene <- which(scenes==link.periods[[grp]][[i]][1])
+					}
 					end.scene <- which(scenes==link.periods[[grp]][[i]][2])
+					while(length(end.scene)==0)
+					{	cat("End scene ",link.periods[[grp]][[i]][2]," is not present: let's try using the next one.")
+						link.periods[[grp]][[i]][2] <- link.periods[[grp]][[i]][2] + 1
+						end.scene <- which(scenes==link.periods[[grp]][[i]][2])
+					}
 					rect(xleft=start.scene, xright=end.scene, 
 							ybottom=grconvertY(0,from='npc'), ytop=grconvertY(1,from='npc'),
 							col="GREY80",border=NA)

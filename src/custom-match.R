@@ -11,7 +11,7 @@
 # 3) to set up the current R workspace, type (replace by your own path to this project):
 #		setwd("D:/Eclipse/workspaces/Networks/Series")
 # 4) then, to launch the script, type: 
-#		source("src/rscripts/custom-match.R")
+#		source("src/custom-match.R")
 # 
 # Author: Vincent Labatut 01/2017
 ###############################################################################
