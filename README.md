@@ -34,7 +34,7 @@ Here are the folders composing the project:
   * Folder `xxx_dyn_ns_match`: community matches obtained for series xxx (only for narrative smoothing).
   * Folder `xxx_dyn_ts10`: input files for series xxx, corresponding to graphs obtained through temporal integration using 10-scene windows. 
   * Folder `xxx_dyn_ts40`: input files for series xxx, corresponding to graphs obtained through temporal integration using 40-scene windows.
-  * Folder `BB_dyn_strength`: strength and weight plots generated for all three types of graphs (narrative smoothing, 10- and 40-scene windows).
+  * Folder `xxx_dyn_strength`: strength and weight plots generated for all three types of graphs (narrative smoothing, 10- and 40-scene windows).
 
 
 # Installation
@@ -43,7 +43,7 @@ Here are the folders composing the project:
    * [`igraph`](http://igraph.org/r/) (tested with version 1.0.1).
    * [`alluvial`](https://cran.r-project.org/web/packages/alluvial/index.html) (tested with version 0.1-2)
 3. Download this project from GitHub and unzip the archive.
-4. Download the data from FigShare and unzip in the data folder, so as to match the existing folder structure.
+4. Download the data from FigShare (see Section _Data_) and unzip in the data folder, so as to match the existing folder structure.
 
 
 # Use
@@ -55,7 +55,7 @@ In order to replicate the experiments from the article, perform the following op
    * The script `src/custom-match.R` to perform community detection and matching on the narrative smoothing graphs;
    * Or the script  `src/strength-evol.R` to generate comparison plots from the three types of graphs.
 
-The generated files will be placed in the data folder, consistently with the description given in the Organization section.
+The generated files will be placed in the `data` folder, consistently with the description given in Section _Organization_.
 
 
 # Dependencies
